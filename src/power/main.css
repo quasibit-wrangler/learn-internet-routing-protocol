@@ -1,0 +1,31 @@
+#miniworld{
+
+   height:750px;
+   width: 100%;
+   background-color:whitesmoke;
+   border-radius: 5px;
+   box-shadow: 4px 4px 1px black;
+
+}
+
+.router{
+  width:25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #0ca4ff;
+}
+
+#svg{
+  z-index:5;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height:500px;
+  width: 100%;
+}
+
+.line{
+  stroke-width:2;
+  stroke:rgb(0,0,0);
+
+}
