@@ -1,6 +1,6 @@
 String.prototype.format = function() {
-  a = this;
-  for (k in arguments) {
+  var a = this;
+  for (var k in arguments) {
     a = a.replace("{" + k + "}", arguments[k])
   }
   return a
@@ -13,17 +13,6 @@ function nextChar(c) {
 }
 
 
-//getIP
-// desc: generates a 3 portion IP address  each using a nibble. 1.5 bytes
-
-function getIP(){
-  var ips=[];
-
-  for(var i=0;i<3;i++){
-    ips.push(getANibble());
-  }
-  return ips;
-}
 
 
 
@@ -38,9 +27,37 @@ function getIP(){
     return  parseInt(""+Math.random()*1000%400 + 800);
   }
 //===========================================
-//
+///////////////////////////////
+/////these use those funcitons
+//getIP
+// desc: generates a 3 portion IP address  each using a nibble. 1.5 bytes
 
-/* global variables used to constantly have access to them, like in the deve tools */
+function getIP(){
+  var ips=[];
+
+  for(var i=0;i<3;i++){
+    ips.push(getANibble());
+  }
+  return ips;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//globals
+//==============================================
+
+/*
+// global variables used to constantly have access to them, like in the deve tools
+*/
 var NUMBERROOMS=9;
 var MIN_CONNECTS=3;
 var MAX_CONNECTS=4;
@@ -49,7 +66,7 @@ var MAX_CONNECTS=4;
 // global variable.
 var rooms;
 
-
+//=================================================
 
 function room(name,IPaddr){
   this.address=IPaddr;// [ xx , xx, xx] 3 nibble dotted decimal
@@ -61,33 +78,50 @@ function room(name,IPaddr){
 
 // uses global variable rooms
 // this function is recursive, hopefully using
-//the request function, it wont take too much ram.
-function connectARoom(){
+//the request function, it wont take too much CPU
+function connectARoom(callback){
   if( ! isGraphFull(rooms)){
     addRandomConnection(rooms);
-    requestAnimationFrame(connectARoom);
+    requestAnimationFrame( () => {
+      connectARoom(callback);
+    });
   }
   else{
-    console.log("graph is full");
+    callback(rooms);
   }
 
 }
 
 
-function connectRooms(newRooms){
-  var i=0;
+function GetRoomThatNeedsConn(r){
+  var PartialList=[]; // mae an array the exact amount.
+  var i, partialIndex=0;
+  var index=0;
 
-     while( ! isGraphFull(newRooms) ){
-       addRandomConnection(newRooms);
-     }
-     console.log("graph is full");
-     return newRooms;
+  //only grab the ones that are under the minimum
+  for(i=0;i<r.length;i++){
+    if(r[i].connections.length<MIN_CONNECTS){
+      PartialList.push(r[i]); // append the pointer of the room to the temp array
+      partialIndex++; //
+    }
+  }
+  //after we make a set of rooms, we
+  do{
+    index=parseInt("" + (Math.random()*r.length*2)%partialIndex);
+    if(partialIndex===1){
+      index=0;
+    }
+  }while(index>=partialIndex);
+
+    return PartialList[index]; ; // one line really just returns a random room.
+
 }
-
 /* This function returns a room that can still make connections,
 * more tricky tha nit seems becasue if we just return a random index,
 * it might select a froom that is already full.
 */
+
+// only selects from a list of rooms that can be added from.
 function GetRandomRoom(r){
   var PartialList=[]; // mae an array the exact amount.
   var i, partialIndex=0;
@@ -96,6 +130,7 @@ function GetRandomRoom(r){
   //but only numemptyrooms amount will still have connections avalible
   // so it makes an array that only has the rooms that have connections to be filled
   for(i=0;i<r.length;i++){
+    //grabs a room that can handle another connection
     if(CanAddConnectionFrom(r[i])){
       PartialList.push(r[i]); // append the pointer of the room to the temp array
       partialIndex++; //
@@ -103,8 +138,8 @@ function GetRandomRoom(r){
   }
   //after we make a set of rooms, we
   do{
-    index=parseInt("" + (Math.random()*100)%partialIndex);
-    if(partialIndex==1){
+    index=parseInt("" + (Math.random()*r.length*2)%partialIndex);
+    if(partialIndex===1){
       index=0;
     }
   }while(index>=partialIndex);
@@ -127,7 +162,7 @@ function CanAddConnectionFrom(R){
 }
 
 function IsSameRoom(r1, r2){
-  if( r1.name==r2.name ){
+  if( r1.name===r2.name ){
     return 1;
   }
   else{
@@ -139,7 +174,7 @@ function ConnectionAlreadyExists(r1,r2){
   var  i;
 
   for(i=0;i<r1.connections.length;i++){
-    if(r1.connections[i][0]==r2.name) {
+    if(r1.connections[i][0]===r2.name) {
       return 1;
     }
   }
@@ -159,22 +194,24 @@ function ConnectRoom(r1,r2,len){
  return;
 } // adds a connection in both of the rooms to each other
 
+
 function addRandomConnection(roomList){
   var A,B;
   while(1)
   {
-    A = GetRandomRoom(roomList); // gets a room that can be added to.
+    A = GetRoomThatNeedsConn(roomList); // gets a room that can be added to.
     // console.log("A"+A);
-    if (CanAddConnectionFrom(A) == 1)
+    // loop until we have a room we can connect
+    if (CanAddConnectionFrom(A) === 1)
       break;
   }
 
-  do
-  {
-   B = GetRandomRoom(roomList); // gets another room that can be added to
-  //  console.log("B"+B);
-  }
-  while(CanAddConnectionFrom(B) == 0 || IsSameRoom(A, B) || ConnectionAlreadyExists(A, B) );
+    do
+    {
+     B = GetRandomRoom(roomList); // gets another room that can be added to
+    //  console.log("B"+B);
+      }
+    while(CanAddConnectionFrom(B) === 0 || IsSameRoom(A, B) || ConnectionAlreadyExists(A, B) );
 
   var len=getADistance();
 
@@ -199,7 +236,7 @@ function isGraphFull(unAttachedRooms){
       return 0;
     }
   }
-  if(numFull==unAttachedRooms.length)
+  if(numFull===unAttachedRooms.length)
     return 1;
   else {
     return 0; // if one room is not full, then graph is not null
@@ -210,28 +247,40 @@ function isGraphFull(unAttachedRooms){
 */
 function initRooms(numrooms){
   var room_index;
-  var newRooms= new Array(numrooms);
+  var newRooms= []
   var name='A';
 
   for(room_index=0;room_index<numrooms;room_index++){
-      newRooms[room_index]=new room(name,getIP());
+      newRooms.push(new room(name,getIP()));
       name=nextChar(name);
   }
   return newRooms;
 }
+/*
+buildRooms
+  initRooms ->
+connectARoom
+  isGraphFull->
+addRandomConnection
+  GetRandomRoom(
+
+  CanAddConnectionFrom(B) === 0 || IsSameRoom(A, B) || ConnectionAlreadyExists(A, B) );
+  connectRoom
 
 
 
-function buildRooms(){
+
+
+*/
+
+
+function buildRooms(callback){
   rooms=initRooms(NUMBERROOMS);
-  console.log(rooms);
   // rooms=connectRooms(rooms);
-  connectARoom();
+  connectARoom(callback); // uses the recursive function to hopefully take less time.
+
 
 }
 
-window.addEventListener('load', function(){
-  buildRooms();
 
-
-});
+export { buildRooms };

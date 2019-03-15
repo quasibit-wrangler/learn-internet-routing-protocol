@@ -1,6 +1,6 @@
 #miniworld{
 
-   height:750px;
+   height:1000px;
    width: 100%;
    background-color:whitesmoke;
    border-radius: 5px;
@@ -20,7 +20,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  height:500px;
+  height:1000px;
   width: 100%;
 }
 
