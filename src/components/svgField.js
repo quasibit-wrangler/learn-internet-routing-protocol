@@ -69,23 +69,35 @@ class SvgField extends Component {
       x:30,
       y: 15
     }
+    var count=0;
     return(
       <g>
-        {  _.map(legends, (item)=>{
-          console.log("offset: ", loc.x);
-          let table =(
-            <g>
-              <Rect dims={this.props.TABLE_DIMS} y={loc.y} x={loc.x} color={item.color}/>
-              <text x={loc.x+15} y={loc.y+15}
-                fontFamily="sans-serif" fontSize="12px" fill="grey">{item.name}</text>
-              <text x={loc.x+15} y={loc.y+30}
-                  fontFamily="sans-serif" fontSize="9px" fill="grey">Connections:</text>
-              {this.renderConnTexts(item,loc)}
-              </g>
-          );
-          loc.x+=this.props.TABLE_DIMS+15;
-          return table;
-        }) }
+        {  _.map(legends,
+          (item)=>{
+            console.log("current y: ",loc.y);
+            let table =(
+              <g>
+                <Rect dims={this.props.TABLE_DIMS} y={loc.y} x={loc.x} color={item.color}/>
+                <text x={loc.x+15} y={loc.y+15}
+                  fontFamily="sans-serif" fontSize="12px" fill="grey">{item.name}</text>
+                <text x={loc.x+15} y={loc.y+30}
+                    fontFamily="sans-serif" fontSize="9px" fill="grey">Connections:</text>
+                {this.renderConnTexts(item,loc)}
+                </g>
+            );
+            loc.x+=this.props.TABLE_DIMS+15;
+            if(count>6){
+              count=0;
+              loc.x=30;
+              loc.y+=this.props.TABLE_DIMS+20
+              console.log("next row:");
+            }
+            else{
+              count++;
+            }
+            return table;
+        })
+      }
       </g>
     )
   }
@@ -151,8 +163,8 @@ class SvgField extends Component {
           {this.renderRouterLegends() }
         </svg>
         <svg key="asdf" id="svgworld" >
-          {this.renderNodes()}
           {this.renderLines()}
+          {this.renderNodes()}
           {this.renderLabels()}
         </svg>
       </article>
