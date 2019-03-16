@@ -14,9 +14,10 @@ class App extends Component {
     this.routers=this.props.field
 
     return (
-      <SvgField routers={this.routers} locations={this.state.locations}/>
+      <SvgField TABLE_DIMS={135} routers={this.routers} locations={this.state.locations}/>
     );
   }
+
   renderChooseField(){
     return (
       <DivPlacer connectRouters={(locations)=>this.setRoutersToConnect(locations)} limit={this.props.field.length} />
@@ -36,6 +37,7 @@ class App extends Component {
       <div className="App">
         {this.state.isDeciding && this.renderChooseField()}
         {!this.state.isDeciding && this.renderRoutersConnected()}
+
       </div>
     );
   }

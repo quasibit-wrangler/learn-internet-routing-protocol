@@ -58,8 +58,8 @@ function getIP(){
 /*
 // global variables used to constantly have access to them, like in the deve tools
 */
-var NUMBERROOMS=9;
-var MIN_CONNECTS=3;
+var NUMBERROOMS=6;
+var MIN_CONNECTS=2;
 var MAX_CONNECTS=4;
 // var NUMBERCONNECTS=3;
 
