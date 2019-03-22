@@ -106,7 +106,7 @@ class SvgField extends Component {
     var y = location.y;
     router.conns.forEach((item,index)=>{
       texts.push(
-        (<text x={location.x+25} y={y+40}
+        (<text key={JSON.stringify(item)} x={location.x+25} y={y+40}
           fontFamily="sans-serif" fontSize="8px" fill="grey">
         {JSON.stringify(item)}
         </text>
@@ -120,16 +120,17 @@ class SvgField extends Component {
   renderLabels(){
 
     var routerDict=this.connectionInfo;
+    console.log(this.connectionInfo);
     var labels = [];
     _.mapKeys(this.connectionInfo,(value,key)=>{
       return _.map(value.connections,(conn)=>{
         var connObj=routerDict[conn[0]];
         labels.push(
           <text
-          key={""+value.x+connObj.x+value.y+connObj.y+"asdf"}
-          x={value.x+(connObj.x-value.x)/2} y={value.y+(connObj.y-value.y)/2-15}
-          fontFamily="sans-serif" fontSize="8px" fill="grey">
-          {conn[1]}
+            key={""+value.x+connObj.x+value.y+connObj.y+"asdf"}
+            x={value.x+(connObj.x-value.x)/2} y={value.y+(connObj.y-value.y)/2-15}
+            fontFamily="sans-serif" fontSize="8px" fill="grey">
+            {conn[1]}
           </text>);
       });
     });
@@ -149,7 +150,7 @@ class SvgField extends Component {
     this.connectionInfo=rectInfo;
      return _.map(nodes, ({loc,color})=>{
        return (
-           <Rect  x={loc.x} y={loc.y} color={color} dims={ROUTERWIDTH}/>
+           <Rect  key={rectInfo.name+JSON.stringify(rectInfo.conns)} x={loc.x} y={loc.y} color={color} dims={ROUTERWIDTH}/>
          );
      });
   }
@@ -159,7 +160,7 @@ class SvgField extends Component {
       <article style={{width:"100%"}}>
       <p> done adding divs, now look at that </p>
       <p> Not to Scale </p>
-        <svg id="svgLegend">
+        <svg key="asdf2" id="svgLegend">
           {this.renderRouterLegends() }
         </svg>
         <svg key="asdf" id="svgworld" >
