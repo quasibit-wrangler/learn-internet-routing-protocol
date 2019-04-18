@@ -2,14 +2,10 @@ import React, {Component} from "react";
 import _ from "lodash";
 import Rect from "./Rect";
 import Line from "./Line"
+
 // import { NODE_INFO, ROUTERWIDTH, NODE_LINKS} from "../data/nodes";
 import {ROUTERWIDTH} from "../data/nodes";
 
-// returns the next character after c.
-//inputs: 'A' -> outputs: 'B'
-function nextChar(c) {
-    return String.fromCharCode(c.charCodeAt(0) + 1);
-}
 
 /* This local component in the /src/componenets folder
 Will use the csv file (live object data actually .js)
@@ -20,15 +16,8 @@ class SvgField extends Component {
     super(props);
 
     // combine the two dictionarys in the props
-    this.connectionInfo = {};
-    //combine the elements in both that we need to connec divs with lines
-    // in an boject representing eac hkey
-    for(var i=0;i<this.props.routers.length;i++){
-      this.connectionInfo[""+this.props.routers[i].name] = Object.assign(
-        {},this.props.routers[i],this.props.locations[i],{
-          color:"#" + Math.random().toString(16).slice(2, 8)
-        });
-    }
+    this.connectionInfo = this.props.routers;
+
 
     this.state={
       LinesToggle:false
@@ -37,15 +26,18 @@ class SvgField extends Component {
   //connect sthe rects with lines
   renderLines(){
     var lines=[];
+    var stats = document.body.getBoundingClientRect();
+    var scale=15;
+    var widthOffset=0;
     _.mapKeys(this.connectionInfo,(value,key)=>{
       // for each item in the dictary, iteratve over the array "connections"
       _.map(value.connections,(conn)=>{
-        var routerDict=this.connectionInfo;
-        var connObj=routerDict[conn[0]];
+        var connObj=this.connectionInfo[conn];
         lines.push(
-            <Line key={""+value.x+connObj.x+value.y+connObj.y} before={[value.x,value.y]}
-             after={[connObj.x,connObj.y]}
-             offset={ROUTERWIDTH/2} />
+            <Line key={""+value.name+conn}
+              before={[value.loc.x*scale+stats.width/2,value.loc.y*scale+500]}
+              after={[connObj.loc.x*scale+stats.width/2,connObj.loc.y*scale+500-widthOffset]}
+              offset={ROUTERWIDTH/2} />
         );
       });
   });
@@ -75,27 +67,30 @@ class SvgField extends Component {
         {  _.map(legends,
           (item)=>{
             console.log("current y: ",loc.y);
-            let table =(
-              <g>
+            if(item.name.length<4){
+              let table =(
+                <g
+                key={""+loc.x+loc.y+Date.now()} >
                 <Rect dims={this.props.TABLE_DIMS} y={loc.y} x={loc.x} color={item.color}/>
                 <text x={loc.x+15} y={loc.y+15}
-                  fontFamily="sans-serif" fontSize="12px" fill="grey">{item.name}</text>
+                fontFamily="sans-serif" fontSize="12px" fill="grey">{item.name}</text>
                 <text x={loc.x+15} y={loc.y+30}
-                    fontFamily="sans-serif" fontSize="9px" fill="grey">Connections:</text>
+                fontFamily="sans-serif" fontSize="9px" fill="grey">Connections:</text>
                 {this.renderConnTexts(item,loc)}
                 </g>
-            );
-            loc.x+=this.props.TABLE_DIMS+15;
-            if(count>6){
-              count=0;
-              loc.x=30;
-              loc.y+=this.props.TABLE_DIMS+20
-              console.log("next row:");
+              );
+              loc.x+=this.props.TABLE_DIMS+15;
+              if(count>6){
+                count=0;
+                loc.x=30;
+                loc.y+=this.props.TABLE_DIMS+20
+                console.log("next row:");
+              }
+              else{
+                count++;
+              }
+              return table;
             }
-            else{
-              count++;
-            }
-            return table;
         })
       }
       </g>
@@ -139,23 +134,35 @@ class SvgField extends Component {
 
   renderNodes(){
     //will be difficults. need color and locations and names
-    var c="A";
-    var rectInfo = this.connectionInfo;
-    var nodes=this.props.locations;
-    for(var r = 0;r<nodes.length;r++){
-      rectInfo[c].loc=nodes[r];
-      nodes[r]=rectInfo[""+c]
-      c=nextChar(c);
-    }
-    this.connectionInfo=rectInfo;
-     return _.map(nodes, ({loc,color})=>{
+    var stats = document.body.getBoundingClientRect();
+    var scale=15;
+   return _.map(this.props.routerarr, ({name,loc})=>{
+       var classes="";
+
+       switch(name.length){
+         case 1:
+         classes+="anchor";
+           break;
+         case 3:
+         classes+="parent";
+
+           break;
+         case 5:
+           classes+="subnet";
+           break;
+          default:
+          break;
+       }
        return (
-           <Rect  key={rectInfo.name+JSON.stringify(rectInfo.conns)} x={loc.x} y={loc.y} color={color} dims={ROUTERWIDTH}/>
+           <Rect routerType={classes} key={name}
+           x={loc.x*scale+stats.width/2}
+           y={loc.y*scale+500} color={"#242424"} />
          );
      });
   }
 
   render(){
+    // {this.renderLabels()}
     return(
       <article style={{width:"100%"}}>
       <p> done adding divs, now look at that </p>
@@ -166,7 +173,6 @@ class SvgField extends Component {
         <svg key="asdf" id="svgworld" >
           {this.renderLines()}
           {this.renderNodes()}
-          {this.renderLabels()}
         </svg>
       </article>
     );

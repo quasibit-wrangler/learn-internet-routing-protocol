@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import {buildRooms} from "./power/build-links"
+import {turnStarsIntoRouters} from "./power/build-star-subnet";
 
 var Rooms;
 
@@ -12,16 +12,16 @@ var Rooms;
 //
 // }
 
-function renderSvgField(rooms){
+function renderSvgField(rooms,array){
   Rooms = rooms;
-  ReactDOM.render(<App field={Rooms}/>, document.getElementById('root'));
+  ReactDOM.render(<App arr={array} field={Rooms}/>, document.getElementById('root'));
 }
 
 
 //Here we set the app to assign the data to a local variable
 //which is rendered in the <App />
-buildRooms(renderSvgField);
-
+// buildRooms(renderSvgField);
+turnStarsIntoRouters(renderSvgField);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
