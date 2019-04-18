@@ -14,35 +14,37 @@ and sends that upstream baack to svgField*/
 class DivPlacer extends Component{
   constructor(props){
     super(props);
-    this.state={
-      routers: []
-    }
-  }
-  addRouter(event){
-    if(!(this.state.routers.length>=this.props.limit) ){
-      var location = {
-        x: event.clientX,
-        y: event.clientY
-      }
-      this.setState((prevState)=>{
-        prevState.routers.push(location);
-        return{
-          routers: prevState.routers
-        }
-      });
-    }
-    else{
-      this.props.connectRouters(this.state.routers);
-    }
   }
   renderCurrentRouters(){
-    return _.map(this.state.routers,(location)=>{
+    var stats = document.body.getBoundingClientRect();
+    var scale=15;
+    var widthOffset=0;
+    console.log("Rendering these: ", this.props.routers);
+    return _.map(this.props.routers,(el)=>{
+        var classes="router";
+
+        switch(el.name.length){
+          case 1:
+          classes+=" anchor";
+          widthOffset=25;
+            break;
+          case 3:
+          classes+=" parent";
+          widthOffset=15;
+
+            break;
+          case 5:
+            classes+=" subnet";
+            widthOffset=7;
+            break;
+        }
+
         return(
-          <div key={""+location.x+location.y+""} className="router"
+          <div key={el.name} id={el.name} className={classes}
             style={{
-               position:"relative",
-               left: ""+location.x+"px",
-               top: ""+location.y+"px"}
+               position:"absolute",
+               left: ""+(el.loc.x*scale+stats.width/2-widthOffset)+"px",
+               top: ""+(el.loc.y*scale+500-widthOffset)+"px"}
             }>
           </div>
         )
@@ -50,9 +52,10 @@ class DivPlacer extends Component{
   }
   render(){
 
+    this.props.connectRouters(this.props.routers);
+
     return (
-      <section onClick={(event)=>{this.addRouter(event)}} id="miniworld">
-      <p>Hello CLick anywhere to select the field.</p>
+      <section id="miniworld">
         {this.renderCurrentRouters()}
       </section>
     )
