@@ -8,6 +8,41 @@
 
 }
 
+.lookup .table-title{
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.lookup{
+  border-radius: 10%;
+  background-color: whitesmoke;
+  border: 1px solid black;
+  z-index:5;
+  position: absolute;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
+
+.lookup td, .lookup th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.lookup tr:nth-child(even){background-color: #f2f2f2;}
+
+.lookup tr:hover {background-color: #ddd;}
+
+.lookup th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
 .router{
   border-radius: 25%;
   border: 2px solid blue;

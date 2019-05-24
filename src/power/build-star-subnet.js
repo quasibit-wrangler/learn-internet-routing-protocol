@@ -1,5 +1,7 @@
 import _ from "lodash";
+import { solve } from "./dijsktra";
 
+import LOCALE_DATA from "../data/routers"
 // #G Global variables
 // #
 // #
@@ -329,26 +331,26 @@ function connectionType(num1,num2){
       return "subnet";
   }
 }
-
-function optimizeConnections(routers){
-  var connDict = {};
-
-  _.map(routers,( { name, connections })=>{
-
-    connections.forEach( (el, index) =>{
-      if( !connDict[name+el] || !connDict[el+name]){
-        connDict[(name+el).toString()] = {
-          link: [name,el],
-          dist: randomDistance(connectionType(name.length,el.length))
-        }
-      }
-    });
-
-  });
-
-  console.log("dictionary of connections: ", connDict);
-
-}
+//
+// function optimizeConnections(routers){
+//   var connDict = {};
+//
+//   _.map(routers,( { name, connections })=>{
+//
+//     connections.forEach( (el, index) =>{
+//       if( !connDict[name+el] || !connDict[el+name]){
+//         connDict[(name+el).toString()] = {
+//           link: [name,el],
+//           dist: randomDistance(connectionType(name.length,el.length))
+//         }
+//       }
+//     });
+//
+//   });
+//
+//   console.log("dictionary of connections: ", connDict);
+//
+// }
 //convert uni-directional to bi-directional graph
 // needs to look like: where: { a: { b: cost of a->b }
 // var graph = {
@@ -380,22 +382,27 @@ function formatForDijkstra(routers){
           }
         });      }
   });
-  console.log("dictionary of connections: ", connDict);
-
+  return connDict;
 }
 
 function turnStarsIntoRouters(callback){
-  var stars = buildStars();
+  var stars = LOCALE_DATA ? null : buildStars();
   var routers = [];
   var connections = [];
-  for(var i=0;i<stars.length;i++){
-    //export the info into a programmically readable format.
-    stars[i].exportIdentities(routers);
-  }
-// /{"address":[3,1,1],"name":"A","connections":[["B",123],["F",255]]}
-  console.log("info in an array: ",routers);
-  // connections = optimizeConnections(routers);
+  // for(var i=0;i<stars.length;i++){
+  //   //export the info into a programmically readable format.
+  //   stars[i].exportIdentities(routers);
+  // }
+  // console.log(JSON.stringify(routers));
+  routers = LOCALE_DATA;
+
+
   connections = formatForDijkstra(routers);
+   _.mapKeys(connections, (value, key) =>{
+    value["routTable"] =  solve(connections,key);
+  });
+  // console.log("the info: ",finishedInfo);
+
   // now we have a bunch of duplicated connections, presiceley, double.
   // so now they have everything except connections.
   var routerDict = {};
@@ -404,9 +411,8 @@ function turnStarsIntoRouters(callback){
       el.name = el.name.join('.');
     routerDict[el.name]=el;
   });
-  console.log("array dict", routerDict);
 
-  callback(routerDict,routers);
+  callback(routerDict,routers,connections);
 
 }
 

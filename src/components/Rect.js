@@ -14,9 +14,9 @@ function dims(type){
   }
 }
 
-const Rect = ( { routerType, x, y, color } ) => {
+const Rect = ( { routerType, x, y, color, info,click} ) => {
   return (
-    <rect x={x} y={y} rx="10" ry="10"
+    <rect onClick={() => { click(info)} } x={x} y={y} rx="10" ry="10"
     width={dims(routerType)} height={dims(routerType)} stroke={color}
     fill="transparent" strokeWidth="5" />
   )

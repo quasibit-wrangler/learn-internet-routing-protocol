@@ -3,18 +3,27 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-
 import {turnStarsIntoRouters} from "./power/build-star-subnet";
-
-var Rooms;
-
+import {Provider} from 'react-redux';
+import {createStore, applyMiddleware} from 'redux';
+import reducer from "./reducers"
+import {createLogger} from 'redux-logger'
 // function renderPlacementField(){
 //
 // }
 
-function renderSvgField(rooms,array){
+var Rooms;
+const store = createStore(
+  reducer,
+  applyMiddleware(createLogger()),
+)
+
+function renderSvgField(rooms,array,conns){
   Rooms = rooms;
-  ReactDOM.render(<App arr={array} field={Rooms}/>, document.getElementById('root'));
+  ReactDOM.render(
+    <Provider store={store}>
+      <App lookup={conns} arr={array} field={Rooms}/>
+    </Provider>, document.getElementById('root'));
 }
 
 

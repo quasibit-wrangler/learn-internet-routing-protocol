@@ -2,9 +2,13 @@ import React, {Component} from "react";
 import _ from "lodash";
 import Rect from "./Rect";
 import Line from "./Line"
-
-// import { NODE_INFO, ROUTERWIDTH, NODE_LINKS} from "../data/nodes";
+import LookupTable from "./LookupTable";
+import {connect} from 'react-redux';
 import {ROUTERWIDTH} from "../data/nodes";
+import {animateAction,doneAnimating} from "../actions/search"
+import {PERFORMED} from "../actions/search"
+// import { NODE_INFO, ROUTERWIDTH, NODE_LINKS} from "../data/nodes";
+
 
 
 /* This local component in the /src/componenets folder
@@ -14,14 +18,23 @@ Will use the csv file (live object data actually .js)
 class SvgField extends Component {
   constructor(props){
     super(props);
-
     // combine the two dictionarys in the props
     this.connectionInfo = this.props.routers;
-
-
-    this.state={
-      LinesToggle:false
+      this.state={
+      LinesToggle:false,
+      tableShown: {},
+      holder: {},
     }
+  }
+  componentDidMount(){
+    let locale = this.state.tableShown;
+    this.props.routerarr.forEach( (el,index)=>{
+      locale[el.name]=0;
+    });
+    this.setState({
+      tableShown:locale
+    })
+    console.log(this.state.tableShown);
   }
   //connect sthe rects with lines
   renderLines(){
@@ -131,21 +144,29 @@ class SvgField extends Component {
     });
     return labels;
   }
+  showTable(info){
+    let localTable = this.state.tableShown;
+    localTable[info.name]=!this.state.tableShown[info.name];
+    this.setState({
+      tableShown: localTable
+    })
+    this.props.addToGroup(info);
+  }
 
   renderNodes(){
     //will be difficults. need color and locations and names
     var stats = document.body.getBoundingClientRect();
-    var scale=15;
-   return _.map(this.props.routerarr, ({name,loc})=>{
+    const scale=15;
+   return _.map(this.props.routerarr, (router)=>{
        var classes="";
+       var color =  this.state.tableShown[router.name] ? '#ffbf00' : "#242424";
 
-       switch(name.length){
+       switch(router.name.length){
          case 1:
          classes+="anchor";
            break;
          case 3:
          classes+="parent";
-
            break;
          case 5:
            classes+="subnet";
@@ -154,31 +175,106 @@ class SvgField extends Component {
           break;
        }
        return (
-           <Rect routerType={classes} key={name}
-           x={loc.x*scale+stats.width/2}
-           y={loc.y*scale+500} color={"#242424"} />
+         <g key={router.name+"gorup"}>
+           <Rect click={ ()=> this.showTable(router)} routerType={classes} key={router.name}
+             x={router.loc.x*scale+stats.width/2}
+             y={router.loc.y*scale+500} color={color} />
+          </g>
          );
      });
   }
+  renderTables(){
+      return _.map(this.props.routerarr, (router)=>{
+        if(this.state.tableShown[router.name])
+          return (
+              <LookupTable loc={router.loc} name={router.name+" Next Hop Table"} key={router.name+"Next Hop Table"}
+              table={this.props.dickstra[router.name]} isSelected />
+          );
+        else {
+          return;
+        }
+        });
+  }
 
+  /* animate one step:
+  brings up the routing table one at atime and does some stuff.
+  */
+  animateOneStep(){
+    let localTable = this.state.tableShown;
+    console.log(this.props.message[0].name,this.props.holder.name);
+    if(this.props.message[0].name===this.state.holder.name){
+      console.log("first iteration");
+      this.resetField();
+    }
+    this.setState({
+      holder:{},
+    })
+    this.setState({
+      tableShown: localTable
+    })
+  }
+
+  resetField(){
+    var el = this.state.tableShown;
+    _.mapKeys( el, (key,value)=>{
+      el[key]=0;
+    })
+    this.setState({
+      tableShown: el,
+    })
+  }
+
+  componentDidUpdate(prevProps){
+    console.log("did we update?");
+    if(this.props.message){
+      this.setState({
+        holder: this.props.holder
+      })
+      this.animateOneStep();
+    }
+  }
   render(){
-    // {this.renderLabels()}
     return(
       <article style={{width:"100%"}}>
-      <p> done adding divs, now look at that </p>
       <p> Not to Scale </p>
-        <svg key="asdf2" id="svgLegend">
-          {this.renderRouterLegends() }
-        </svg>
         <svg key="asdf" id="svgworld" >
           {this.renderLines()}
           {this.renderNodes()}
         </svg>
+        <div>
+        {this.renderTables()}
+        </div>
       </article>
     );
   }
 
 }
 
+function mapDispatchToProps(dispatch){
+  return {
+    animateAction: (arr,curr) => {
+      dispatch(animateAction(arr,curr));
+    },
+    doneAnimating: ()=>{
+      dispatch(doneAnimating());
+    }
+  }
+}
 
-export default SvgField;
+function mapStateToProps(state){
+
+
+  if(state.search.animating){
+    console.log("ANIMATING");
+  }
+
+  return {
+    message: state.search.data,
+    holder: state.search.current,
+    ...state.search
+  }
+
+}
+
+
+export default connect(mapStateToProps,mapDispatchToProps)(SvgField);

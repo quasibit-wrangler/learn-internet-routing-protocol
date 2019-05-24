@@ -1,4 +1,13 @@
-//dijkstra solve graph starting at s
+/*
+Author:  github.com/jpillora
+date: Feb 27, 2014
+https://gist.github.com/jpillora/7382441
+
+desc: comes up with the paths needed to reach a certain pointin the graph,
+written in javascript.
+*/
+
+
 function solve(graph, s) {
   var solutions = {};
   solutions[s] = [];
@@ -89,17 +98,6 @@ for(var id in layout) {
   });
 }
 
-//choose start node
-var start = '10';
-//get all solutions
-var solutions = solve(graph, start);
-
-console.log("From '"+start+"' to");
-//display solutions
-for(var s in solutions) {
-  if(!solutions[s]) continue;
-  console.log(" -> " + s + ": [" + solutions[s].join(", ") + "]   (dist:" + solutions[s].dist + ")");
-}
 
 // From '10' to
 //  -> 2: [7, 5, 4, 2]   (dist:4)
@@ -117,3 +115,5 @@ for(var s in solutions) {
 //  -> 14: [7, 5, 4, 3, 13, 14]   (dist:6)
 //  -> 15: [7, 5, 4, 3, 6, 15]   (dist:6)
 //  -> R: [7, 5, 4, 2, R]   (dist:5)
+
+export { solve }
